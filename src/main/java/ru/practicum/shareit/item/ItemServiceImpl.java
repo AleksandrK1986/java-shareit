@@ -25,13 +25,13 @@ public class ItemServiceImpl implements ItemService {
     public Item create(Item item, long userId) {
         checkUser(userId);
         item.setOwner(userId);
-        if(item.getName().isBlank()) {
+        if (item.getName().isBlank()) {
             throw new ValidationException("У вещи должно быть указано название");
         }
-        if(item.getAvailable() == null) {
+        if (item.getAvailable() == null) {
             throw new ValidationException("У вещи должна быть указан доступность");
         }
-        if(item.getDescription() == null) {
+        if (item.getDescription() == null) {
             throw new ValidationException("У вещи должно быть указано описание");
         }
         return storage.create(item);
@@ -42,8 +42,8 @@ public class ItemServiceImpl implements ItemService {
         checkUser(userId);
         List<Item> items = storage.findAll();
         List<Item> userItems = new ArrayList<>();
-        for(Item i: items) {
-            if(i.getOwner() == userId) {
+        for (Item i : items) {
+            if (i.getOwner() == userId) {
                 userItems.add(i);
             }
         }
@@ -54,10 +54,10 @@ public class ItemServiceImpl implements ItemService {
     public Item update(Item item, long itemId, long userId) {
         checkItem(itemId);
         checkUser(userId);
-        if(storage.findById(itemId).getOwner() != userId) {
+        if (storage.findById(itemId).getOwner() != userId) {
             throw new NoSuchElementException("Нельзя обновлять вещь, не принадлежащую пользователю");
         }
-        if(item.getId()==0){
+        if (item.getId() == 0) {
             item.setId(itemId);
         }
         return storage.update(item);
@@ -78,11 +78,11 @@ public class ItemServiceImpl implements ItemService {
     public List<Item> search(String text) {
         List<Item> allItems = storage.findAll();
         List<Item> items = new ArrayList<>();
-        if(text.equals("")) {
+        if (text.equals("")) {
             return null;
         }
-        for(Item i: allItems) {
-            if((i.getDescription().toLowerCase().contains(text.toLowerCase()) ||
+        for (Item i : allItems) {
+            if ((i.getDescription().toLowerCase().contains(text.toLowerCase()) ||
                     i.getName().toLowerCase().contains(text.toLowerCase())) &&
                     i.getAvailable()) {
                 items.add(i);
@@ -92,13 +92,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void checkUser(long userId) {
-        if(userStorage.findById(userId) == null) {
+        if (userStorage.findById(userId) == null) {
             throw new NoSuchElementException("Пользователь не найден в хранилище");
         }
     }
 
     private void checkItem(long itemId) {
-        if(storage.findById(itemId) == null) {
+        if (storage.findById(itemId) == null) {
             throw new NoSuchElementException("Вещь не найдена в хранилище");
         }
     }

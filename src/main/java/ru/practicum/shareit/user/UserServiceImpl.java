@@ -30,10 +30,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(User user, long userId) {
         checkUser(userId);
-        if(user.getEmail() != null) {
+        if (user.getEmail() != null) {
             checkUserEmail(user);
         }
-        if(user.getId()==0){
+        if (user.getId() == 0) {
             user.setId(userId);
         }
         return storage.update(user);
@@ -51,14 +51,14 @@ public class UserServiceImpl implements UserService {
         storage.delete(id);
     }
 
-    private void checkUserEmail (User user) {
-        if(user.getEmail() == null) {
+    private void checkUserEmail(User user) {
+        if (user.getEmail() == null) {
             throw new ValidationException("Передан пустой email");
-        } else if(!user.getEmail().contains("@") || !user.getEmail().contains(".")) {
+        } else if (!user.getEmail().contains("@") || !user.getEmail().contains(".")) {
             throw new ValidationException("Передан некорректный email");
         } else {
-            for(User u: storage.findAll()){
-                if(u.getEmail().equals(user.getEmail())) {
+            for (User u : storage.findAll()) {
+                if (u.getEmail().equals(user.getEmail())) {
                     throw new RuntimeException("Пользователь с таким email уже существует");
                 }
             }
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkUser(long userId) {
-        if(storage.findById(userId) == null) {
+        if (storage.findById(userId) == null) {
             throw new NoSuchElementException("Пользователь не найден в хранилище");
         }
     }

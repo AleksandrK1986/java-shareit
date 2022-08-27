@@ -36,10 +36,10 @@ public class UserStorageImpl implements UserStorage {
     @Override
     public User update(User user) {
         User newUser = users.get(user.getId());
-        if(user.getName() != null) {
+        if (user.getName() != null) {
             newUser.setName(user.getName());
         }
-        if(user.getEmail() != null) {
+        if (user.getEmail() != null) {
             newUser.setEmail(user.getEmail());
         }
         users.remove(user.getId());

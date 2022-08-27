@@ -34,7 +34,7 @@ public class ItemController {
     public List<ItemDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") long userId) {
         List<Item> items = service.findAll(userId);
         List<ItemDto> itemsDto = new ArrayList<>();
-        for(Item i: items) {
+        for (Item i : items) {
             itemsDto.add(toItemDto(i));
         }
         return itemsDto;
@@ -44,7 +44,7 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam(defaultValue = "") String text) {
         List<Item> items = service.search(text);
         List<ItemDto> itemsDto = new ArrayList<>();
-        if(items != null) {
+        if (items != null) {
             for (Item i : items) {
                 itemsDto.add(toItemDto(i));
             }

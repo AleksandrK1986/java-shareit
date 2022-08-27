@@ -18,6 +18,7 @@ import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
 @RequestMapping(path = "/users")
 public class UserController {
     private UserService service;
+
     @Autowired
     public UserController(UserService service) {
         this.service = service;
@@ -32,11 +33,12 @@ public class UserController {
     public List<UserDto> findAll() {
         List<User> users = service.findAll();
         List<UserDto> usersDto = new ArrayList<>();
-        for(User u: users) {
+        for (User u : users) {
             usersDto.add(toUserDto(u));
         }
         return usersDto;
     }
+
     @PostMapping
     public UserDto create(@Valid @RequestBody UserDto userDto) {
         return toUserDto(service.create(toUser(userDto)));

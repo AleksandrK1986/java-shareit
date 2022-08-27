@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 
 @Slf4j
 @ControllerAdvice(assignableTypes = {ItemController.class, UserController.class})
-public class  ErrorHandler {
+public class ErrorHandler {
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handleNoSuchElement(final NoSuchElementException e) {
         log.warn("Ошибка поиска объекта {}    Причина: {}", LocalDateTime.now(), e.getMessage());

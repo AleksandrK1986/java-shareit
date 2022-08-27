@@ -36,19 +36,19 @@ public class ItemStorageImpl implements ItemStorage {
     @Override
     public Item update(Item item) {
         Item newItem = items.get(item.getId());
-        if(item.getName() != null) {
+        if (item.getName() != null) {
             newItem.setName(item.getName());
         }
-        if(item.getDescription() != null) {
+        if (item.getDescription() != null) {
             newItem.setDescription(item.getDescription());
         }
-        if(item.getAvailable() != null) {
+        if (item.getAvailable() != null) {
             newItem.setAvailable(item.getAvailable());
         }
-        if(item.getOwner() != 0) {
+        if (item.getOwner() != 0) {
             newItem.setOwner(item.getOwner());
         }
-        if(item.getRequest() != null) {
+        if (item.getRequest() != null) {
             newItem.setRequest(item.getRequest());
         }
         items.remove(item.getId());

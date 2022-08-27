@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import ru.practicum.shareit.requests.ItemRequest;
 
