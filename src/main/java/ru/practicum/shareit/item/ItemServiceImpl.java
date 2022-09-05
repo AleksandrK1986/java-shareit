@@ -24,7 +24,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item create(Item item, long userId) {
         checkUser(userId);
-        item.setOwner(userId);
+        item.setOwner(userStorage.findById(userId));
         if (item.getName().isBlank()) {
             throw new ValidationException("У вещи должно быть указано название");
         }
@@ -43,7 +43,7 @@ public class ItemServiceImpl implements ItemService {
         List<Item> items = storage.findAll();
         List<Item> userItems = new ArrayList<>();
         for (Item i : items) {
-            if (i.getOwner() == userId) {
+            if (i.getOwner().getId() == userId) {
                 userItems.add(i);
             }
         }
@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
     public Item update(Item item, long itemId, long userId) {
         checkItem(itemId);
         checkUser(userId);
-        if (storage.findById(itemId).getOwner() != userId) {
+        if (storage.findById(itemId).getOwner().getId() != userId) {
             throw new NoSuchElementException("Нельзя обновлять вещь, не принадлежащую пользователю");
         }
         if (item.getId() == 0) {

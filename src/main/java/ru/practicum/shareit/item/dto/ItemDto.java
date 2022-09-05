@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.shareit.requests.ItemRequest;
+import ru.practicum.shareit.user.dto.UserDto;
 
 /**
  * // TODO .
@@ -16,6 +17,6 @@ public class ItemDto {
     private String name;
     private String description;
     private Boolean available;
-    private long owner;
+    private UserDto owner;
     private ItemRequest request;
 }

@@ -45,7 +45,7 @@ public class ItemStorageImpl implements ItemStorage {
         if (item.getAvailable() != null) {
             newItem.setAvailable(item.getAvailable());
         }
-        if (item.getOwner() != 0) {
+        if (item.getOwner() != null) {
             newItem.setOwner(item.getOwner());
         }
         if (item.getRequest() != null) {
