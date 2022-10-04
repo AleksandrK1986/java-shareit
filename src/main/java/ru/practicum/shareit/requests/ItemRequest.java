@@ -18,4 +18,7 @@ public class ItemRequest {
     private String description;
     private User requestor;
     private LocalDateTime created;
+
+    //@Column(name = "registration_date")
+    //    private Instant registrationDate = Instant.now();
 }
