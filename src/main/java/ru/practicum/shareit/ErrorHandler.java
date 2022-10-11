@@ -1,10 +1,12 @@
 package ru.practicum.shareit;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.item.ItemController;
 import ru.practicum.shareit.user.UserController;
 
@@ -14,7 +16,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Slf4j
-@ControllerAdvice(assignableTypes = {ItemController.class, UserController.class})
+@ControllerAdvice(assignableTypes = {ItemController.class, UserController.class, BookingController.class})
 public class ErrorHandler {
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handleNoSuchElement(final NoSuchElementException e) {
@@ -31,6 +33,15 @@ public class ErrorHandler {
         return new ResponseEntity<>(
                 Map.of("error", e.getMessage()),
                 HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, String>> handlePSQLExceptionHelper(DataIntegrityViolationException e) {
+        log.warn("Ошибка сохранения объекта: " + e.getMessage());
+        return new ResponseEntity<>(
+                Map.of("error", e.getMessage()),
+                HttpStatus.CONFLICT
         );
     }
 

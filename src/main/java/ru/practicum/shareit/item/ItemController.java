@@ -2,15 +2,16 @@ package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
-import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
+import static ru.practicum.shareit.item.dto.ItemMapper.*;
 
 /**
  * // TODO .
@@ -26,16 +27,17 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ItemDto findById(@PathVariable long id) {
-        return toItemDto(service.findById(id));
+    public ItemWithBookingDto findById(@PathVariable long id,
+                                       @RequestHeader(value = "X-Sharer-User-Id") long userId) {
+        return toItemWithBookingDto(service.findById(id, userId));
     }
 
     @GetMapping
-    public List<ItemDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") long userId) {
+    public List<ItemWithBookingDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") long userId) {
         List<Item> items = service.findAll(userId);
-        List<ItemDto> itemsDto = new ArrayList<>();
+        List<ItemWithBookingDto> itemsDto = new ArrayList<>();
         for (Item i : items) {
-            itemsDto.add(toItemDto(i));
+            itemsDto.add(toItemWithBookingDto(i));
         }
         return itemsDto;
     }
@@ -56,6 +58,13 @@ public class ItemController {
     public ItemDto create(@Valid @RequestBody ItemDto itemDto,
                           @RequestHeader(value = "X-Sharer-User-Id") long userId) {
         return toItemDto(service.create(toItem(itemDto), userId));
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+                                    @RequestHeader(value = "X-Sharer-User-Id") long userId,
+                                    @PathVariable long itemId) {
+        return toCommentDto(service.createComment(toComment(commentDto), itemId, userId));
     }
 
     @PatchMapping("/{itemId}")

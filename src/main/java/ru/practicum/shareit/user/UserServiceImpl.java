@@ -9,64 +9,62 @@ import java.util.NoSuchElementException;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private UserStorage storage;
+
+    private UserRepository userRepository;
 
     @Autowired
-    public UserServiceImpl(UserStorage storage) {
-        this.storage = storage;
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public User create(User user) {
         checkUserEmail(user);
-        return storage.create(user);
+        return userRepository.save(user);
     }
 
     @Override
     public List<User> findAll() {
-        return storage.findAll();
+        return userRepository.findAll();
     }
 
     @Override
     public User update(User user, long userId) {
         checkUser(userId);
+        User newUser = userRepository.getReferenceById(userId);
         if (user.getEmail() != null) {
-            checkUserEmail(user);
+            newUser.setEmail(user.getEmail());
         }
-        if (user.getId() == 0) {
-            user.setId(userId);
+        if (user.getName() != null) {
+            newUser.setName(user.getName());
         }
-        return storage.update(user);
+        return userRepository.save(newUser);
     }
 
     @Override
     public User findById(long id) {
         checkUser(id);
-        return storage.findById(id);
+        return userRepository.getReferenceById(id);
     }
 
     @Override
     public void delete(long id) {
         checkUser(id);
-        storage.delete(id);
+        userRepository.delete(userRepository.getReferenceById(id));
     }
 
     private void checkUserEmail(User user) {
         if (user.getEmail() == null) {
             throw new ValidationException("Передан пустой email");
-        } else if (!user.getEmail().contains("@") || !user.getEmail().contains(".")) {
-            throw new ValidationException("Передан некорректный email");
-        } else {
-            for (User u : storage.findAll()) {
-                if (u.getEmail().equals(user.getEmail())) {
-                    throw new RuntimeException("Пользователь с таким email уже существует");
-                }
-            }
         }
+        if (!user.getEmail().contains("@") || !user.getEmail().contains(".")) {
+            throw new ValidationException("Передан некорректный email");
+        }
+
     }
 
     private void checkUser(long userId) {
-        if (storage.findById(userId) == null) {
+        if (userRepository.findById(userId).isEmpty()) {
             throw new NoSuchElementException("Пользователь не найден в хранилище");
         }
     }
