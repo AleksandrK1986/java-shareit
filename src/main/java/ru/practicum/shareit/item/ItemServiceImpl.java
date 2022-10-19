@@ -6,6 +6,8 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.requests.ItemRequest;
+import ru.practicum.shareit.requests.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 
 import javax.validation.ValidationException;
@@ -20,16 +22,19 @@ public class ItemServiceImpl implements ItemService {
     private UserRepository userRepository;
     private BookingRepository bookingRepository;
     private CommentRepository commentRepository;
+    private ItemRequestRepository itemRequestRepository;
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository,
                            UserRepository userRepository,
                            BookingRepository bookingRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository,
+                           ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
@@ -44,6 +49,9 @@ public class ItemServiceImpl implements ItemService {
         }
         if (item.getDescription() == null) {
             throw new ValidationException("У вещи должно быть указано описание");
+        }
+        if (item.getRequestId() != null) {
+            item.setRequest(itemRequestRepository.getReferenceById(item.getRequestId()));
         }
         return itemRepository.save(item);
     }
@@ -74,30 +82,17 @@ public class ItemServiceImpl implements ItemService {
         checkUser(userId);
         List<Item> items = itemRepository.findAllByOrderByIdAsc();
         List<Item> userItems = new ArrayList<>();
-        Booking lastBooking = null;
-        Booking nextBooking = null;
-
         for (Item i : items) {
             if (i.getOwner().getId() == userId) {
                 userItems.add(checkAndAddItemBookings(i, userId));
             }
-            //i = checkAndAddItemBookings(i, userId);
-            /*List<Booking> itemBookings = bookingRepository.findBookingsByItemOrderByStart(i);
-            for (Booking b : itemBookings) {
-                if (b.getEnd().isAfter(LocalDateTime.now()) &&
-                        b.getStart().isBefore(LocalDateTime.now())) {
-                    lastBooking = b;
-                }
-            }
-            for (Booking b : itemBookings) {
-                if (b.getStart().isAfter(LocalDateTime.now())) {
-                    nextBooking = b;
-                }
-            }
-            i.setLastBooking(lastBooking);
-            i.setNextBooking(nextBooking);*/
         }
         return userItems;
+    }
+
+    @Override
+    public List<Item> findAllByRequestId(long requestId) {
+        return itemRepository.findItemsByRequestOrderByIdAsc(itemRequestRepository.getReferenceById(requestId));
     }
 
     @Override

@@ -49,9 +49,11 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getAllUserBookings(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                               @RequestParam(defaultValue = "ALL") String state) {
+                                               @RequestParam(name = "state", defaultValue = "ALL") String state,
+                                               @RequestParam(name = "from", required = false) Integer from,
+                                               @RequestParam(name = "size", required = false) Integer size) {
         List<BookingDto> bookingsDto = new ArrayList();
-        List<Booking> bookings = service.getAllUserBookings(state, userId);
+        List<Booking> bookings = service.getAllUserBookings(state, userId, from, size);
         if (bookings != null) {
             for (Booking b : bookings) {
                 bookingsDto.add(toBookingDto(b));
@@ -62,9 +64,11 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getAllUserItemsBookings(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                                    @RequestParam(defaultValue = "ALL") String state) {
+                                                    @RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                    @RequestParam(name = "from", required = false) Integer from,
+                                                    @RequestParam(name = "size", required = false) Integer size) {
         List<BookingDto> bookingsDto = new ArrayList();
-        List<Booking> bookings = service.getAllUserItemsBookings(state, userId);
+        List<Booking> bookings = service.getAllUserItemsBookings(state, userId, from, size);
         if (bookings != null) {
             for (Booking b : bookings) {
                 bookingsDto.add(toBookingDto(b));

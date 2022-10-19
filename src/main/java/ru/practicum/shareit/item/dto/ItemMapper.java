@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.dto;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.requests.ItemRequest;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -25,13 +26,17 @@ public class ItemMapper {
                 commentDtos.add(toCommentDto(c));
             }
         }
+        Long requestId = null;
+        if (item.getRequest() != null) {
+            requestId = item.getRequest().getId();
+        }
         return new ItemDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
                 userDto,
-                item.getRequest() != null ? item.getRequest() : null,
+                requestId,
                 commentDtos
         );
     }
@@ -79,11 +84,13 @@ public class ItemMapper {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 user,
-                itemDto.getRequest() != null ? itemDto.getRequest() : null,
                 null,
                 null,
-                null
+                null,
+                null,
+                itemDto.getRequestId() != null ? itemDto.getRequestId() : null
         );
+
     }
 
     public static Comment toComment(CommentDto commentDto) {

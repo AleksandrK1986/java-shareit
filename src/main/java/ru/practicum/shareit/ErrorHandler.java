@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.item.ItemController;
+import ru.practicum.shareit.requests.ItemRequest;
+import ru.practicum.shareit.requests.ItemRequestController;
 import ru.practicum.shareit.user.UserController;
 
 import javax.validation.ValidationException;
@@ -16,7 +18,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Slf4j
-@ControllerAdvice(assignableTypes = {ItemController.class, UserController.class, BookingController.class})
+@ControllerAdvice(assignableTypes = {ItemController.class,
+        UserController.class,
+        BookingController.class,
+        ItemRequestController.class})
 public class ErrorHandler {
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handleNoSuchElement(final NoSuchElementException e) {

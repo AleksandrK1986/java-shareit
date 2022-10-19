@@ -1,6 +1,10 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.State;
@@ -24,7 +28,9 @@ public class BookingServiceImpl implements BookingService {
     private ItemRepository itemRepository;
 
     @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserRepository userRepository, ItemRepository itemRepository) {
+    public BookingServiceImpl(BookingRepository bookingRepository,
+                              UserRepository userRepository,
+                              ItemRepository itemRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
@@ -85,17 +91,41 @@ public class BookingServiceImpl implements BookingService {
         return booking;
     }
 
-    public List<Booking> getAllUserBookings(String state, long userId) {
+    public List<Booking> getAllUserBookings(String state, long userId, Integer from, Integer size) {
         checkUser(userId);
         User user = userRepository.getReferenceById(userId);
         List<Booking> bookings = new ArrayList<>();
         try {
             switch (State.valueOf(state)) {
                 case ALL:
-                    bookings = bookingRepository.findBookingsByBookerAndStatusOrStatusOrderByStartDesc(
-                            user,
-                            Status.APPROVED,
-                            Status.WAITING);
+                    if (from == null || size == null) {
+                        bookings = bookingRepository.findBookingsByBookerAndStatusOrStatusOrderByStartDesc(
+                                user,
+                                Status.APPROVED,
+                                Status.WAITING);
+                    } else {
+                        if (from < 0 || size <= 0) {
+                            throw new ValidationException("Передан некорректный размер ожидаемого ответа: from "
+                                    + from + ", size " + size);
+                        }
+                        Sort sortBy = Sort.by(Sort.Direction.DESC, "start");
+                        Pageable page = PageRequest.of(from / size, from / size, sortBy);
+                        do {
+                            Page<Booking> bookingsPage = bookingRepository.findBookingsByBookerAndStatusOrStatusOrderByStartDesc(
+                                    user,
+                                    Status.APPROVED,
+                                    Status.WAITING,
+                                    page);
+                            for (Booking b : bookingsPage.getContent()) {
+                                bookings.add(b);
+                            }
+                            if (bookingsPage.hasNext()) {
+                                page = bookingsPage.nextOrLastPageable();
+                            } else {
+                                page = null;
+                            }
+                        } while (page != null);
+                    }
                     break;
                 case CURRENT:
                     bookings = bookingRepository.findBookingsByBookerAndStartBeforeAndEndAfterOrderByStartDesc(
@@ -126,17 +156,34 @@ public class BookingServiceImpl implements BookingService {
         return bookings;
     }
 
-    public List<Booking> getAllUserItemsBookings(String state, long userId) {
+    public List<Booking> getAllUserItemsBookings(String state, long userId, Integer from, Integer size) {
         checkUser(userId);
         User user = userRepository.getReferenceById(userId);
         List<Booking> bookings = new ArrayList<>();
         try {
             switch (State.valueOf(state)) {
                 case ALL:
-                    bookings = bookingRepository.findBookingsByItem_OwnerAndStatusOrStatusOrderByStartDesc(
-                            user,
-                            Status.APPROVED,
-                            Status.WAITING);
+                    if (from == null || size == null) {
+                        bookings = bookingRepository.findBookingsByItem_OwnerOrderByStartDesc(user);
+                    } else {
+                        if (from < 0 || size <= 0) {
+                            throw new ValidationException("Передан некорректный размер ожидаемого ответа: from "
+                                    + from + ", size " + size);
+                        }
+                        Sort sortBy = Sort.by(Sort.Direction.DESC, "start");
+                        Pageable page = PageRequest.of(from / size, from / size, sortBy);
+                        do {
+                            Page<Booking> bookingsPage = bookingRepository.findBookingsByItem_OwnerOrderByStartDesc(user, page);
+                            for (Booking b : bookingsPage.getContent()) {
+                                bookings.add(b);
+                            }
+                            if (bookingsPage.hasNext()) {
+                                page = bookingsPage.nextOrLastPageable();
+                            } else {
+                                page = null;
+                            }
+                        } while (page != null);
+                    }
                     break;
                 case CURRENT:
                     bookings = bookingRepository.findBookingsByItem_OwnerAndStartBeforeAndEndAfterOrderByStartDesc(
