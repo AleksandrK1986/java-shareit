@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.item.ItemController;
-import ru.practicum.shareit.requests.ItemRequest;
 import ru.practicum.shareit.requests.ItemRequestController;
 import ru.practicum.shareit.user.UserController;
 

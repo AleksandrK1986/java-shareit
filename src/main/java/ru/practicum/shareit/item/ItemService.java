@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface ItemService {
     List<Item> findAll(long userId);
+
     List<Item> findAllByRequestId(long requestId);
 
     List<Item> search(String text);

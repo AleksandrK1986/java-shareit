@@ -6,7 +6,6 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.requests.ItemRequest;
 import ru.practicum.shareit.requests.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 

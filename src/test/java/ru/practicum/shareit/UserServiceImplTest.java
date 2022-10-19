@@ -1,7 +1,6 @@
 package ru.practicum.shareit;
 
 
-import org.hibernate.type.AnyType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +37,7 @@ public class UserServiceImplTest {
         Mockito
                 .when(userRepository.save(Mockito.any()))
                 .thenReturn(user);
-        Assertions.assertEquals(1,userService.create(newUser).getId());
+        Assertions.assertEquals(1, userService.create(newUser).getId());
     }
 
     @Test
@@ -70,7 +69,7 @@ public class UserServiceImplTest {
         Mockito
                 .when(userRepository.findAll())
                 .thenReturn(users);
-        Assertions.assertEquals(2,userService.findAll().size());
+        Assertions.assertEquals(2, userService.findAll().size());
     }
 
     @Test
@@ -86,7 +85,7 @@ public class UserServiceImplTest {
     @Test
     void testUpdateUser() {
         UserService userService = new UserServiceImpl(userRepository);
-        User user = new User(1,"name", "email@mail.ru");
+        User user = new User(1, "name", "email@mail.ru");
         User newUser = user;
         newUser.setEmail("newEmail@mail.ru");
         Mockito
@@ -104,7 +103,7 @@ public class UserServiceImplTest {
     @Test
     void testFindByIdUser() {
         UserService userService = new UserServiceImpl(userRepository);
-        User user = new User(1,"name", "email@mail.ru");
+        User user = new User(1, "name", "email@mail.ru");
         Mockito
                 .when(userRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(user));
@@ -117,7 +116,7 @@ public class UserServiceImplTest {
     @Test
     void testDeleteUser() {
         UserService userService = new UserServiceImpl(userRepository);
-        User user = new User(1,"name", "email@mail.ru");
+        User user = new User(1, "name", "email@mail.ru");
         Mockito
                 .when(userRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(user));

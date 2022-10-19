@@ -24,9 +24,10 @@ public class ItemRequestMapper {
                 itemDtos
         );
     }
+
     public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
         ItemRequest itemRequest = new ItemRequest();
-        if(itemRequestDto != null) {
+        if (itemRequestDto != null) {
             itemRequest.setDescription(itemRequestDto.getDescription());
         }
         return itemRequest;
