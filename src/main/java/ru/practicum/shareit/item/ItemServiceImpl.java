@@ -1,6 +1,10 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
@@ -22,6 +26,8 @@ public class ItemServiceImpl implements ItemService {
     private BookingRepository bookingRepository;
     private CommentRepository commentRepository;
     private ItemRequestRepository itemRequestRepository;
+
+    private final int maxSize = 50;
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository,
@@ -77,11 +83,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> findAll(long userId) {
+    public List<Item> findAll(long userId, Integer from, Integer size) {
         checkUser(userId);
-        List<Item> items = itemRepository.findAllByOrderByIdAsc();
+        Sort sortBy = Sort.by(Sort.Direction.ASC, "id");
+        Pageable page = null;
+        if (from != null || size != null) {
+            page = PageRequest.of(from / size, from / size, sortBy);
+        } else {
+            page = PageRequest.of(0, maxSize, sortBy);
+        }
+        Page<Item> items = itemRepository.findAllByOrderByIdAsc(page);
         List<Item> userItems = new ArrayList<>();
-        for (Item i : items) {
+        for (Item i : items.getContent()) {
             if (i.getOwner().getId() == userId) {
                 userItems.add(checkAndAddItemBookings(i, userId));
             }

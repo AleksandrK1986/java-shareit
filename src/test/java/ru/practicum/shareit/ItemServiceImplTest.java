@@ -3,12 +3,14 @@ package ru.practicum.shareit;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -22,17 +24,20 @@ import ru.practicum.shareit.requests.ItemRequest;
 import ru.practicum.shareit.requests.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.UserService;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import javax.validation.ValidationException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -41,7 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         properties = "db.name=test",
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ExtendWith(MockitoExtension.class)
 public class ItemServiceImplTest {
     @Mock
     ItemRepository itemRepository;
@@ -55,7 +59,8 @@ public class ItemServiceImplTest {
     ItemRequestRepository itemRequestRepository;
 
     private final EntityManager em;
-    private final ItemService service;
+    private final ItemService itemService;
+    private final UserService userService;
 
     @Test
     void testCreateWithNoFoundUser() {
@@ -353,20 +358,103 @@ public class ItemServiceImplTest {
                 commentRepository,
                 itemRequestRepository);
         User user = new User(1, "name", "email@mail.ru");
-        Item item1 = new Item();
-        item1.setOwner(user);
-        Item item2 = new Item();
-        item2.setOwner(user);
-        List<Item> items = new ArrayList<>();
-        items.add(item1);
-        items.add(item2);
+        Sort sortBy = Sort.by(Sort.Direction.ASC, "id");
+        Pageable page = PageRequest.of(0, 50, sortBy);
+        Page<Item> itemPage = new Page<Item>() {
+            @Override
+            public int getTotalPages() {
+                return 0;
+            }
+
+            @Override
+            public long getTotalElements() {
+                return 0;
+            }
+
+            @Override
+            public <U> Page<U> map(Function<? super Item, ? extends U> converter) {
+                return null;
+            }
+
+            @Override
+            public int getNumber() {
+                return 0;
+            }
+
+            @Override
+            public int getSize() {
+                return 0;
+            }
+
+            @Override
+            public int getNumberOfElements() {
+                return 0;
+            }
+
+            @Override
+            public List<Item> getContent() {
+                Item item1 = new Item();
+                item1.setOwner(user);
+                Item item2 = new Item();
+                item2.setOwner(user);
+                List<Item> items = new ArrayList<>();
+                items.add(item1);
+                items.add(item2);
+                return items;
+            }
+
+            @Override
+            public boolean hasContent() {
+                return false;
+            }
+
+            @Override
+            public Sort getSort() {
+                return null;
+            }
+
+            @Override
+            public boolean isFirst() {
+                return false;
+            }
+
+            @Override
+            public boolean isLast() {
+                return false;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                return false;
+            }
+
+            @Override
+            public Pageable nextPageable() {
+                return null;
+            }
+
+            @Override
+            public Pageable previousPageable() {
+                return null;
+            }
+
+            @Override
+            public Iterator<Item> iterator() {
+                return null;
+            }
+        };
         Mockito
                 .when(userRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(user));
         Mockito
-                .when(itemRepository.findAllByOrderByIdAsc())
-                .thenReturn(items);
-        Assertions.assertEquals(2, itemService.findAll(user.getId()).size());
+                .when(itemRepository.findAllByOrderByIdAsc(page))
+                .thenReturn(itemPage);
+        Assertions.assertEquals(2, itemService.findAll(user.getId(), null, null).size());
     }
 
     @Test
@@ -744,7 +832,41 @@ public class ItemServiceImplTest {
         Assertions.assertEquals(1, itemService.search("desc").size());
     }
 
+    @Test
+    void testGetUserItemsFromBD() {
+        User user = new User(
+                1,
+                "userName",
+                "email@mail.ru"
+        );
+        User userFromBd = userService.create(user);
+        Item item = new Item(
+                1,
+                "itemName",
+                "itemDescription",
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        itemService.create(item, userFromBd.getId());
+        TypedQuery<Item> query = em.createQuery("Select i from Item i where i.owner.id = :id", Item.class);
+        Item itemFromBD = query
+                .setParameter("id", userFromBd.getId())
+                .getSingleResult();
+        assertThat(itemFromBD.getId(), notNullValue());
+        assertThat(itemFromBD.getName(), equalTo(item.getName()));
+        assertThat(itemFromBD.getDescription(), equalTo(item.getDescription()));
+        assertThat(itemFromBD.getOwner().getName(), equalTo(userFromBd.getName()));
 
+        List<Item> items = itemService.findAll(userFromBd.getId(), null, null);
+        assertThat(items.size(), equalTo(1));
+        assertThat(items.get(0).getOwner().getName(), equalTo(user.getName()));
+
+    }
 
 
 }

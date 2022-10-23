@@ -158,13 +158,96 @@ public class ItemRequestServiceImplTest {
                 itemRequestRepository,
                 userRepository,
                 itemService);
-        ItemRequest itemRequestFr = new ItemRequest();
-        ItemRequest itemRequestSec = new ItemRequest();
-        ItemRequest itemRequestTh = new ItemRequest();
-        List<ItemRequest> itemRequests = new ArrayList<>();
-        itemRequests.add(itemRequestFr);
-        itemRequests.add(itemRequestSec);
-        itemRequests.add(itemRequestTh);
+        Page<ItemRequest> itemRequestPage = new Page<ItemRequest>() {
+            @Override
+            public int getTotalPages() {
+                return 0;
+            }
+
+            @Override
+            public long getTotalElements() {
+                return 0;
+            }
+
+            @Override
+            public <U> Page<U> map(Function<? super ItemRequest, ? extends U> converter) {
+                return null;
+            }
+
+            @Override
+            public int getNumber() {
+                return 0;
+            }
+
+            @Override
+            public int getSize() {
+                return 0;
+            }
+
+            @Override
+            public int getNumberOfElements() {
+                return 0;
+            }
+
+            @Override
+            public List<ItemRequest> getContent() {
+                ItemRequest itemRequestFr = new ItemRequest();
+                ItemRequest itemRequestSec = new ItemRequest();
+                User requester1 = new User(1, "name", "email@mail.ru");
+                User requester2 = new User(2, "name", "email@mail.ru");
+                itemRequestFr.setRequestor(requester1);
+                itemRequestSec.setRequestor(requester2);
+                List<ItemRequest> itemRequests = new ArrayList<>();
+                itemRequests.add(itemRequestFr);
+                itemRequests.add(itemRequestSec);
+                return itemRequests;
+            }
+
+            @Override
+            public boolean hasContent() {
+                return false;
+            }
+
+            @Override
+            public Sort getSort() {
+                return null;
+            }
+
+            @Override
+            public boolean isFirst() {
+                return false;
+            }
+
+            @Override
+            public boolean isLast() {
+                return false;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                return false;
+            }
+
+            @Override
+            public Pageable nextPageable() {
+                return null;
+            }
+
+            @Override
+            public Pageable previousPageable() {
+                return null;
+            }
+
+            @Override
+            public Iterator<ItemRequest> iterator() {
+                return null;
+            }
+        };
         List<Item> items = new ArrayList<>();
         Item item = new Item();
         items.add(item);
@@ -172,12 +255,12 @@ public class ItemRequestServiceImplTest {
                 .when(userRepository.existsById(Mockito.anyLong()))
                 .thenReturn(true);
         Mockito
-                .when(itemRequestRepository.findAll())
-                .thenReturn(itemRequests);
+                .when(itemRequestRepository.findAll((Pageable) Mockito.any()))
+                .thenReturn(itemRequestPage);
         Mockito
                 .when(itemService.findAllByRequestId(Mockito.anyLong()))
                 .thenReturn(items);
-        Assertions.assertEquals(3, itemRequestService.findAll(1, null, null).size());
+        Assertions.assertEquals(1, itemRequestService.findAllUserRequest(1, null, null).size());
 
     }
 
@@ -191,8 +274,8 @@ public class ItemRequestServiceImplTest {
                 .when(userRepository.existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
-        Throwable thrown = assertThrows(ValidationException.class, () -> {
-            itemRequestService.findAll(1, -1, 0);
+        Throwable thrown = assertThrows(IllegalArgumentException.class, () -> {
+            itemRequestService.findAllAlienRequests(1, -1, 0);
         });
         assertNotNull(thrown.getMessage());
     }
@@ -319,7 +402,7 @@ public class ItemRequestServiceImplTest {
         Mockito
                 .when(itemService.findAllByRequestId(Mockito.anyLong()))
                 .thenReturn(items);
-        Assertions.assertEquals(3, itemRequestService.findAll(1, 0, 3).size());
+        Assertions.assertEquals(3, itemRequestService.findAllAlienRequests(1, 0, 3).size());
 
     }
 }

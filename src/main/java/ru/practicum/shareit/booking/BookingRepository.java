@@ -12,45 +12,43 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findBookingsByBookerOrderByStartDesc(User user);
 
-    List<Booking> findBookingsByBookerAndStartBeforeAndEndAfterOrderByStartDesc(User user, LocalDateTime start, LocalDateTime end);
+    Page<Booking> findBookingsByBookerAndStartBeforeAndEndAfterOrderByStartDesc(User user,
+                                                                                LocalDateTime start,
+                                                                                LocalDateTime end,
+                                                                                Pageable page);
 
-    List<Booking> findBookingsByBookerAndEndBeforeOrderByStartDesc(User user, LocalDateTime localDateTime);
+    Page<Booking> findBookingsByBookerAndEndBeforeOrderByStartDesc(User user,
+                                                                   LocalDateTime localDateTime,
+                                                                   Pageable page);
 
-    List<Booking> findBookingsByBookerAndStartAfterOrderByStartDesc(User user, LocalDateTime localDateTime);
+    Page<Booking> findBookingsByBookerAndStartAfterOrderByStartDesc(User user,
+                                                                    LocalDateTime localDateTime,
+                                                                    Pageable page);
 
-    List<Booking> findBookingsByBookerAndStatusOrderByStartDesc(User user, Status status);
-
-    List<Booking> findBookingsByBookerAndStatusOrStatusOrderByStartDesc(User user,
-                                                                        Status statusFirst,
-                                                                        Status statusSecond);
+    Page<Booking> findBookingsByBookerAndStatusOrderByStartDesc(User user, Status status, Pageable page);
 
     Page<Booking> findBookingsByBookerAndStatusOrStatusOrderByStartDesc(User user,
                                                                         Status statusFirst,
                                                                         Status statusSecond,
                                                                         Pageable page);
 
-    List<Booking> findBookingsByItem_OwnerOrderByStartDesc(User user);
-
     Page<Booking> findBookingsByItem_OwnerOrderByStartDesc(User user, Pageable page);
 
-    List<Booking> findBookingsByItem_OwnerAndStartBeforeAndEndAfterOrderByStartDesc(User user,
+    Page<Booking> findBookingsByItem_OwnerAndStartBeforeAndEndAfterOrderByStartDesc(User user,
                                                                                     LocalDateTime start,
-                                                                                    LocalDateTime end);
+                                                                                    LocalDateTime end,
+                                                                                    Pageable page);
 
-    List<Booking> findBookingsByItem_OwnerAndEndBeforeOrderByStartDesc(User user, LocalDateTime localDateTime);
+    Page<Booking> findBookingsByItem_OwnerAndEndBeforeOrderByStartDesc(User user,
+                                                                       LocalDateTime localDateTime,
+                                                                       Pageable page);
 
-    List<Booking> findBookingsByItem_OwnerAndStartAfterOrderByStartDesc(User user, LocalDateTime localDateTime);
+    Page<Booking> findBookingsByItem_OwnerAndStartAfterOrderByStartDesc(User user,
+                                                                        LocalDateTime localDateTime,
+                                                                        Pageable page);
 
-    List<Booking> findBookingsByItem_OwnerAndStatusOrderByStartDesc(User user, Status status);
-
-    List<Booking> findBookingsByItem_OwnerAndStatusOrStatusOrderByStartDesc(User user, Status statusFirst, Status statusSecond);
-
-    Page<Booking> findBookingsByItem_OwnerAndStatusOrStatusOrderByStartDesc(User user,
-                                                                            Status statusFirst,
-                                                                            Status statusSecond,
-                                                                            Pageable page);
+    Page<Booking> findBookingsByItem_OwnerAndStatusOrderByStartDesc(User user, Status status, Pageable page);
 
     List<Booking> findBookingsByItemOrderByStart(Item item);
 

@@ -1,18 +1,17 @@
 package ru.practicum.shareit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.UserService;
@@ -21,9 +20,9 @@ import ru.practicum.shareit.user.dto.UserMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,14 +33,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @AutoConfigureMockMvc
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(UserController.class)
 public class UserControllerTest {
-    @Mock
+    @MockBean
     private UserService userService;
 
-    @InjectMocks
-    private UserController controller;
-
+    @Autowired
     private MockMvc mvc;
 
     private UserDto userDto;
@@ -52,9 +49,6 @@ public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .build();
         userDto = new UserDto(
                 1,
                 "john",
@@ -112,7 +106,8 @@ public class UserControllerTest {
         mvc.perform(get("/users"))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(content().json(mapper.writeValueAsString(Arrays.asList(userDto))));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", Matchers.is(userDto.getId()), long.class));
     }
 
     @Test

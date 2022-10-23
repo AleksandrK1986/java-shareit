@@ -6,17 +6,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -39,9 +36,9 @@ import ru.practicum.shareit.user.dto.UserDto;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -50,13 +47,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(BookingController.class)
 public class BookingControllerTest {
-    @Mock
+    @MockBean
     private BookingService bookingService;
-
-    @InjectMocks
-    private BookingController controller;
 
     @Autowired
     private MockMvc mvc;
@@ -83,9 +77,6 @@ public class BookingControllerTest {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .build();
         mapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
                 .build();
@@ -287,7 +278,8 @@ public class BookingControllerTest {
                         .param("size", "2"))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(content().json(mapper.writeValueAsString(Arrays.asList(bookingDto))));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", Matchers.is(bookingDto.getId()), long.class));
     }
 
     @Test
@@ -303,7 +295,8 @@ public class BookingControllerTest {
                         .param("size", "2"))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(content().json(mapper.writeValueAsString(Arrays.asList(bookingDto))));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", Matchers.is(bookingDto.getId()), long.class));
     }
 }
 

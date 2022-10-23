@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.requests.dto.ItemRequestDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,7 @@ public class ItemRequestController {
     @GetMapping
     public List<ItemRequestDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") long userId) {
         List<ItemRequestDto> itemRequestDtos = new ArrayList<>();
-        List<ItemRequest> itemRequests = itemRequestService.findAll(userId, null, null);
+        List<ItemRequest> itemRequests = itemRequestService.findAllUserRequest(userId, null, null);
         if (itemRequests != null) {
             for (ItemRequest ir : itemRequests) {
                 itemRequestDtos.add(toItemRequestDto(ir));
@@ -51,10 +53,10 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDto> findAllInPages(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                              @RequestParam(required = false) Integer from,
-                                              @RequestParam(required = false) Integer size) {
+                                               @RequestParam(required = false) @PositiveOrZero Integer from,
+                                               @RequestParam(required = false) @Positive Integer size) {
 
-        List<ItemRequest> itemRequests = itemRequestService.findAll(userId, from, size);
+        List<ItemRequest> itemRequests = itemRequestService.findAllAlienRequests(userId, from, size);
         List<ItemRequestDto> itemRequestDtos = new ArrayList<>();
         for (ItemRequest ir : itemRequests) {
             itemRequestDtos.add(toItemRequestDto(ir));

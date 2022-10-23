@@ -6,17 +6,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -33,9 +30,9 @@ import ru.practicum.shareit.user.dto.UserDto;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -45,14 +42,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(ItemRequestController.class)
 public class ItemRequestControllerTest {
 
-    @Mock
+    @MockBean
     private ItemRequestService itemRequestService;
-
-    @InjectMocks
-    private ItemRequestController controller;
 
     @Autowired
     private MockMvc mvc;
@@ -70,9 +64,6 @@ public class ItemRequestControllerTest {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .build();
         mapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
                 .build();
@@ -185,26 +176,28 @@ public class ItemRequestControllerTest {
     void testFindAllItemRequest() throws Exception {
         List<ItemRequest> itemRequestList = new ArrayList<>();
         itemRequestList.add(itemRequest);
-        when(itemRequestService.findAll(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        when(itemRequestService.findAllUserRequest(Mockito.anyLong(), Mockito.any(), Mockito.any()))
                 .thenReturn(itemRequestList);
         mvc.perform(get("/requests")
                         .header("X-Sharer-User-Id", "1"))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(content().json(mapper.writeValueAsString(Arrays.asList(itemRequestDto))));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", Matchers.is(itemRequestDto.getId()), long.class));
     }
 
     @Test
     void testFindAllItemRequestPages() throws Exception {
         List<ItemRequest> itemRequestList = new ArrayList<>();
         itemRequestList.add(itemRequest);
-        when(itemRequestService.findAll(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        when(itemRequestService.findAllAlienRequests(Mockito.anyLong(), Mockito.any(), Mockito.any()))
                 .thenReturn(itemRequestList);
         mvc.perform(get("/requests/all")
                         .header("X-Sharer-User-Id", "1"))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(content().json(mapper.writeValueAsString(Arrays.asList(itemRequestDto))));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", Matchers.is(itemRequestDto.getId()), long.class));
     }
 
     @Test

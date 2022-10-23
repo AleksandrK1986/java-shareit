@@ -21,6 +21,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private UserRepository userRepository;
     private ItemService itemService;
 
+    private final int maxSize = 50;
+
     @Autowired
     public ItemRequestServiceImpl(ItemRequestRepository itemRequestRepository,
                                   UserRepository userRepository,
@@ -53,31 +55,44 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequest> findAll(long userId, Integer from, Integer size) {
+    public List<ItemRequest> findAllUserRequest(long userId, Integer from, Integer size) {
         checkUser(userId);
         List<ItemRequest> itemRequests = new ArrayList<>();
+        Sort sortByCreated = Sort.by(Sort.Direction.DESC, "created");
+        Pageable page;
         if (from == null || size == null) {
-            itemRequests = itemRequestRepository.findAll();
+            page = PageRequest.of(0, maxSize, sortByCreated);
         } else {
-            if (from.intValue() < 0 || size.intValue() <= 0) {
-                throw new ValidationException("Передан некорректный размер ожидаемого ответа: from "
-                        + from + ", size " + size);
+            page = PageRequest.of(from, from + size, sortByCreated);
+        }
+        Page<ItemRequest> itemRequestPage = itemRequestRepository.findAll(page);
+        for (ItemRequest ir : itemRequestPage.getContent()) {
+            if (ir.getRequestor().getId() == userId) {
+                itemRequests.add(ir);
             }
-            Sort sortByCreated = Sort.by(Sort.Direction.DESC, "created");
-            Pageable page = PageRequest.of(from.intValue(), from.intValue() + size.intValue(), sortByCreated);
-            do {
-                Page<ItemRequest> itemRequestPage = itemRequestRepository.findAll(page);
-                for (ItemRequest ir : itemRequestPage.getContent()) {
-                    if (ir.getRequestor().getId() != userId) {
-                        itemRequests.add(ir);
-                    }
-                }
-                if (itemRequestPage.hasNext()) {
-                    page = itemRequestPage.nextOrLastPageable();
-                } else {
-                    page = null;
-                }
-            } while (page != null);
+        }
+        for (ItemRequest ir : itemRequests) {
+            ir.setItems(itemService.findAllByRequestId(ir.getId()));
+        }
+        return itemRequests;
+    }
+
+    @Override
+    public List<ItemRequest> findAllAlienRequests(long userId, Integer from, Integer size) {
+        checkUser(userId);
+        List<ItemRequest> itemRequests = new ArrayList<>();
+        Sort sortByCreated = Sort.by(Sort.Direction.DESC, "created");
+        Pageable page;
+        if (from == null || size == null) {
+            page = PageRequest.of(0, maxSize, sortByCreated);
+        } else {
+            page = PageRequest.of(from, from + size, sortByCreated);
+        }
+        Page<ItemRequest> itemRequestPage = itemRequestRepository.findAll(page);
+        for (ItemRequest ir : itemRequestPage.getContent()) {
+            if (ir.getRequestor().getId() != userId) {
+                itemRequests.add(ir);
+            }
         }
         for (ItemRequest ir : itemRequests) {
             ir.setItems(itemService.findAllByRequestId(ir.getId()));
