@@ -38,7 +38,8 @@ public class Item {
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    @Transient
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "request_id")
     private ItemRequest request;
 
     @Transient
@@ -49,5 +50,8 @@ public class Item {
 
     @Transient
     private List<Comment> comments;
+
+    @Transient
+    private Long requestId;
 
 }

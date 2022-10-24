@@ -8,6 +8,8 @@ import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +35,10 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemWithBookingDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") long userId) {
-        List<Item> items = service.findAll(userId);
+    public List<ItemWithBookingDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") long userId,
+                                            @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                            @RequestParam(name = "size", required = false) @Positive Integer size) {
+        List<Item> items = service.findAll(userId, from, size);
         List<ItemWithBookingDto> itemsDto = new ArrayList<>();
         for (Item i : items) {
             itemsDto.add(toItemWithBookingDto(i));

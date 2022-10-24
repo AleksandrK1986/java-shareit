@@ -1,6 +1,10 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.State;
@@ -12,7 +16,6 @@ import ru.practicum.shareit.user.UserRepository;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -23,8 +26,12 @@ public class BookingServiceImpl implements BookingService {
     private UserRepository userRepository;
     private ItemRepository itemRepository;
 
+    private final int maxSize = 50;
+
     @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserRepository userRepository, ItemRepository itemRepository) {
+    public BookingServiceImpl(BookingRepository bookingRepository,
+                              UserRepository userRepository,
+                              ItemRepository itemRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
@@ -85,91 +92,118 @@ public class BookingServiceImpl implements BookingService {
         return booking;
     }
 
-    public List<Booking> getAllUserBookings(String state, long userId) {
+    public List<Booking> getAllUserBookings(String state, long userId, Integer from, Integer size) {
         checkUser(userId);
         User user = userRepository.getReferenceById(userId);
-        List<Booking> bookings = new ArrayList<>();
+        Page<Booking> bookingsPage = null;
         try {
             switch (State.valueOf(state)) {
                 case ALL:
-                    bookings = bookingRepository.findBookingsByBookerAndStatusOrStatusOrderByStartDesc(
+                    bookingsPage = bookingRepository.findBookingsByBookerAndStatusOrStatusOrderByStartDesc(
                             user,
                             Status.APPROVED,
-                            Status.WAITING);
+                            Status.WAITING,
+                            getPage(from, size));
                     break;
                 case CURRENT:
-                    bookings = bookingRepository.findBookingsByBookerAndStartBeforeAndEndAfterOrderByStartDesc(
+                    bookingsPage = bookingRepository.findBookingsByBookerAndStartBeforeAndEndAfterOrderByStartDesc(
                             user,
                             LocalDateTime.now(),
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            getPage(from, size));
                     break;
                 case PAST:
-                    bookings = bookingRepository.findBookingsByBookerAndEndBeforeOrderByStartDesc(
+                    bookingsPage = bookingRepository.findBookingsByBookerAndEndBeforeOrderByStartDesc(
                             user,
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            getPage(from, size));
                     break;
                 case FUTURE:
-                    bookings = bookingRepository.findBookingsByBookerAndStartAfterOrderByStartDesc(
+                    bookingsPage = bookingRepository.findBookingsByBookerAndStartAfterOrderByStartDesc(
                             user,
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            getPage(from, size));
                     break;
                 case WAITING:
-                    bookings = bookingRepository.findBookingsByBookerAndStatusOrderByStartDesc(user, Status.WAITING);
+                    bookingsPage = bookingRepository.findBookingsByBookerAndStatusOrderByStartDesc(
+                            user,
+                            Status.WAITING,
+                            getPage(from, size));
                     break;
                 case REJECTED:
-                    bookings = bookingRepository.findBookingsByBookerAndStatusOrderByStartDesc(user, Status.REJECTED);
+                    bookingsPage = bookingRepository.findBookingsByBookerAndStatusOrderByStartDesc(
+                            user,
+                            Status.REJECTED,
+                            getPage(from, size));
                     break;
             }
         } catch (IllegalArgumentException e) {
             throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return bookings;
+        return bookingsPage.getContent();
     }
 
-    public List<Booking> getAllUserItemsBookings(String state, long userId) {
+    public List<Booking> getAllUserItemsBookings(String state, long userId, Integer from, Integer size) {
         checkUser(userId);
         User user = userRepository.getReferenceById(userId);
-        List<Booking> bookings = new ArrayList<>();
+        Page<Booking> bookingsPage = null;
         try {
             switch (State.valueOf(state)) {
                 case ALL:
-                    bookings = bookingRepository.findBookingsByItem_OwnerAndStatusOrStatusOrderByStartDesc(
+                    bookingsPage = bookingRepository.findBookingsByItem_OwnerOrderByStartDesc(
                             user,
-                            Status.APPROVED,
-                            Status.WAITING);
+                            getPage(from, size));
                     break;
                 case CURRENT:
-                    bookings = bookingRepository.findBookingsByItem_OwnerAndStartBeforeAndEndAfterOrderByStartDesc(
+                    bookingsPage = bookingRepository.findBookingsByItem_OwnerAndStartBeforeAndEndAfterOrderByStartDesc(
                             user,
                             LocalDateTime.now(),
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            getPage(from, size));
                     break;
                 case PAST:
-                    bookings = bookingRepository.findBookingsByItem_OwnerAndEndBeforeOrderByStartDesc(
+                    bookingsPage = bookingRepository.findBookingsByItem_OwnerAndEndBeforeOrderByStartDesc(
                             user,
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            getPage(from, size));
                     break;
                 case FUTURE:
-                    bookings = bookingRepository.findBookingsByItem_OwnerAndStartAfterOrderByStartDesc(
+                    bookingsPage = bookingRepository.findBookingsByItem_OwnerAndStartAfterOrderByStartDesc(
                             user,
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            getPage(from, size));
                     break;
                 case WAITING:
-                    bookings = bookingRepository.findBookingsByItem_OwnerAndStatusOrderByStartDesc(user, Status.WAITING);
+                    bookingsPage = bookingRepository.findBookingsByItem_OwnerAndStatusOrderByStartDesc(
+                            user,
+                            Status.WAITING,
+                            getPage(from, size));
                     break;
                 case REJECTED:
-                    bookings = bookingRepository.findBookingsByItem_OwnerAndStatusOrderByStartDesc(user, Status.REJECTED);
+                    bookingsPage = bookingRepository.findBookingsByItem_OwnerAndStatusOrderByStartDesc(
+                            user,
+                            Status.REJECTED,
+                            getPage(from, size));
                     break;
             }
         } catch (IllegalArgumentException e) {
             throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return bookings;
+        return bookingsPage.getContent();
     }
 
     private void checkUser(long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NoSuchElementException("Передан некорректный id пользователя");
+        }
+    }
+
+    private Pageable getPage(Integer from, Integer size) {
+        Sort sortBy = Sort.by(Sort.Direction.DESC, "start");
+        if (from != null || size != null) {
+            return PageRequest.of(from / size, from / size, sortBy);
+        } else {
+            return PageRequest.of(0, maxSize, sortBy);
         }
     }
 }

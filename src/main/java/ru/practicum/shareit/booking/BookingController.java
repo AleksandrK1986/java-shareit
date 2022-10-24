@@ -6,6 +6,8 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +51,11 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getAllUserBookings(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                               @RequestParam(defaultValue = "ALL") String state) {
+                                               @RequestParam(name = "state", defaultValue = "ALL") String state,
+                                               @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                               @RequestParam(name = "size", required = false) @Positive Integer size) {
         List<BookingDto> bookingsDto = new ArrayList();
-        List<Booking> bookings = service.getAllUserBookings(state, userId);
+        List<Booking> bookings = service.getAllUserBookings(state, userId, from, size);
         if (bookings != null) {
             for (Booking b : bookings) {
                 bookingsDto.add(toBookingDto(b));
@@ -62,9 +66,11 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getAllUserItemsBookings(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                                    @RequestParam(defaultValue = "ALL") String state) {
+                                                    @RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                    @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                                    @RequestParam(name = "size", required = false) @Positive Integer size) {
         List<BookingDto> bookingsDto = new ArrayList();
-        List<Booking> bookings = service.getAllUserItemsBookings(state, userId);
+        List<Booking> bookings = service.getAllUserItemsBookings(state, userId, from, size);
         if (bookings != null) {
             for (Booking b : bookings) {
                 bookingsDto.add(toBookingDto(b));

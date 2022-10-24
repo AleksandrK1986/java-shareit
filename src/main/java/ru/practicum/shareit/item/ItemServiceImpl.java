@@ -1,11 +1,16 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.requests.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 
 import javax.validation.ValidationException;
@@ -20,16 +25,21 @@ public class ItemServiceImpl implements ItemService {
     private UserRepository userRepository;
     private BookingRepository bookingRepository;
     private CommentRepository commentRepository;
+    private ItemRequestRepository itemRequestRepository;
+
+    private final int maxSize = 50;
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository,
                            UserRepository userRepository,
                            BookingRepository bookingRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository,
+                           ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
@@ -44,6 +54,9 @@ public class ItemServiceImpl implements ItemService {
         }
         if (item.getDescription() == null) {
             throw new ValidationException("У вещи должно быть указано описание");
+        }
+        if (item.getRequestId() != null) {
+            item.setRequest(itemRequestRepository.getReferenceById(item.getRequestId()));
         }
         return itemRepository.save(item);
     }
@@ -70,34 +83,28 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> findAll(long userId) {
+    public List<Item> findAll(long userId, Integer from, Integer size) {
         checkUser(userId);
-        List<Item> items = itemRepository.findAllByOrderByIdAsc();
+        Sort sortBy = Sort.by(Sort.Direction.ASC, "id");
+        Pageable page = null;
+        if (from != null || size != null) {
+            page = PageRequest.of(from / size, from / size, sortBy);
+        } else {
+            page = PageRequest.of(0, maxSize, sortBy);
+        }
+        Page<Item> items = itemRepository.findAllByOrderByIdAsc(page);
         List<Item> userItems = new ArrayList<>();
-        Booking lastBooking = null;
-        Booking nextBooking = null;
-
-        for (Item i : items) {
+        for (Item i : items.getContent()) {
             if (i.getOwner().getId() == userId) {
                 userItems.add(checkAndAddItemBookings(i, userId));
             }
-            //i = checkAndAddItemBookings(i, userId);
-            /*List<Booking> itemBookings = bookingRepository.findBookingsByItemOrderByStart(i);
-            for (Booking b : itemBookings) {
-                if (b.getEnd().isAfter(LocalDateTime.now()) &&
-                        b.getStart().isBefore(LocalDateTime.now())) {
-                    lastBooking = b;
-                }
-            }
-            for (Booking b : itemBookings) {
-                if (b.getStart().isAfter(LocalDateTime.now())) {
-                    nextBooking = b;
-                }
-            }
-            i.setLastBooking(lastBooking);
-            i.setNextBooking(nextBooking);*/
         }
         return userItems;
+    }
+
+    @Override
+    public List<Item> findAllByRequestId(long requestId) {
+        return itemRepository.findItemsByRequestOrderByIdAsc(itemRequestRepository.getReferenceById(requestId));
     }
 
     @Override

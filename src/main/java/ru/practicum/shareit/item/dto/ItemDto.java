@@ -2,8 +2,8 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.requests.ItemRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
@@ -12,6 +12,7 @@ import java.util.List;
  * // TODO .
  */
 @AllArgsConstructor
+@NoArgsConstructor
 @Setter
 @Getter
 public class ItemDto {
@@ -20,6 +21,6 @@ public class ItemDto {
     private String description;
     private Boolean available;
     private UserDto owner;
-    private ItemRequest request;
+    private Long requestId;
     private List<CommentDto> comments;
 }
