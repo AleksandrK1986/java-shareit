@@ -200,8 +200,10 @@ public class BookingServiceImpl implements BookingService {
 
     private Pageable getPage(Integer from, Integer size) {
         Sort sortBy = Sort.by(Sort.Direction.DESC, "start");
-        if (from != null || size != null) {
+        if (from != null && size != null && from != 0) {
             return PageRequest.of(from / size, from / size, sortBy);
+        } else if (from != null && size != null && from == 0) {
+            return PageRequest.of(0, size, sortBy);
         } else {
             return PageRequest.of(0, maxSize, sortBy);
         }

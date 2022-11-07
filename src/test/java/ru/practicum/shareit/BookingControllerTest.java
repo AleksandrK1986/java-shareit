@@ -38,12 +38,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
+//import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+//import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+//import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -223,45 +223,45 @@ public class BookingControllerTest {
 
     @Test
     void testCreateBooking() throws Exception {
-        when(bookingService.create(Mockito.any(), Mockito.anyLong()))
+        Mockito.when(bookingService.create(Mockito.any(), Mockito.anyLong()))
                 .thenReturn(booking);
-        mvc.perform(post("/bookings")
+        mvc.perform(MockMvcRequestBuilders.post("/bookings")
                         .header("X-Sharer-User-Id", "1")
                         .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(bookingDto.getId()), long.class))
                 .andExpect(jsonPath("$.itemId", is(bookingDto.getItemId()), long.class));
     }
 
     @Test
     void testApproveBooking() throws Exception {
-        when(bookingService.approved(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyLong()))
+        Mockito.when(bookingService.approved(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyLong()))
                 .thenReturn(booking);
-        mvc.perform(patch("/bookings/{bookingId}", 1)
+        mvc.perform(MockMvcRequestBuilders.patch("/bookings/{bookingId}", 1)
                         .header("X-Sharer-User-Id", "1")
                         .param("approved", "true")
                         .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(bookingDto.getId()), long.class))
                 .andExpect(jsonPath("$.status", is(bookingDto.getStatus().toString()), String.class));
     }
 
     @Test
     void testFindByIdBooking() throws Exception {
-        when(bookingService.getById(Mockito.anyLong(), Mockito.anyLong()))
+        Mockito.when(bookingService.getById(Mockito.anyLong(), Mockito.anyLong()))
                 .thenReturn(booking);
-        mvc.perform(get("/bookings/{bookingId}", 1)
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/{bookingId}", 1)
                         .header("X-Sharer-User-Id", "1"))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", Matchers.is(bookingDto.getId()), long.class));
     }
 
@@ -269,16 +269,16 @@ public class BookingControllerTest {
     void testFindAllBookings() throws Exception {
         List<Booking> bookingList = new ArrayList<>();
         bookingList.add(booking);
-        when(bookingService.getAllUserBookings(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt(), Mockito.anyInt()))
+        Mockito.when(bookingService.getAllUserBookings(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt(), Mockito.anyInt()))
                 .thenReturn(bookingList);
-        mvc.perform(get("/bookings")
+        mvc.perform(MockMvcRequestBuilders.get("/bookings")
                         .header("X-Sharer-User-Id", "1")
                         .param("state", "ALL")
                         .param("from", "0")
                         .param("size", "2"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(jsonPath("$[0].id", Matchers.is(bookingDto.getId()), long.class));
     }
 
@@ -286,16 +286,16 @@ public class BookingControllerTest {
     void testFindAllUserItemsBookings() throws Exception {
         List<Booking> bookingList = new ArrayList<>();
         bookingList.add(booking);
-        when(bookingService.getAllUserItemsBookings(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt(), Mockito.anyInt()))
+        Mockito.when(bookingService.getAllUserItemsBookings(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt(), Mockito.anyInt()))
                 .thenReturn(bookingList);
-        mvc.perform(get("/bookings/owner")
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/owner")
                         .header("X-Sharer-User-Id", "1")
                         .param("state", "ALL")
                         .param("from", "0")
                         .param("size", "2"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(jsonPath("$[0].id", Matchers.is(bookingDto.getId()), long.class));
     }
 }

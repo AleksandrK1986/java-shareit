@@ -86,9 +86,11 @@ public class ItemServiceImpl implements ItemService {
     public List<Item> findAll(long userId, Integer from, Integer size) {
         checkUser(userId);
         Sort sortBy = Sort.by(Sort.Direction.ASC, "id");
-        Pageable page = null;
-        if (from != null || size != null) {
+        Pageable page;
+        if (from != null && size != null && from != 0) {
             page = PageRequest.of(from / size, from / size, sortBy);
+        } else if (from != null && size != null && from == 0) {
+            page = PageRequest.of(0, size, sortBy);
         } else {
             page = PageRequest.of(0, maxSize, sortBy);
         }

@@ -6,8 +6,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +49,9 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getAllUserBookings(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                               @RequestParam(name = "state", defaultValue = "ALL") String state,
-                                               @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
-                                               @RequestParam(name = "size", required = false) @Positive Integer size) {
+                                               @RequestParam(name = "state") String state,
+                                               @RequestParam(name = "from") Integer from,
+                                               @RequestParam(name = "size") Integer size) {
         List<BookingDto> bookingsDto = new ArrayList();
         List<Booking> bookings = service.getAllUserBookings(state, userId, from, size);
         if (bookings != null) {
@@ -66,9 +64,9 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getAllUserItemsBookings(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                                    @RequestParam(name = "state", defaultValue = "ALL") String state,
-                                                    @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
-                                                    @RequestParam(name = "size", required = false) @Positive Integer size) {
+                                                    @RequestParam(name = "state") String state,
+                                                    @RequestParam(name = "from") Integer from,
+                                                    @RequestParam(name = "size") Integer size) {
         List<BookingDto> bookingsDto = new ArrayList();
         List<Booking> bookings = service.getAllUserItemsBookings(state, userId, from, size);
         if (bookings != null) {
