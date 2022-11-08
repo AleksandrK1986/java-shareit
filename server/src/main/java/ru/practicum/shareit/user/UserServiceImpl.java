@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.validation.ValidationException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -55,10 +54,10 @@ public class UserServiceImpl implements UserService {
 
     private void checkUserEmail(User user) {
         if (user.getEmail() == null) {
-            throw new ValidationException("Передан пустой email");
+            throw new NullPointerException("Передан пустой email");
         }
         if (!user.getEmail().contains("@") || !user.getEmail().contains(".")) {
-            throw new ValidationException("Передан некорректный email");
+            throw new NullPointerException("Передан некорректный email");
         }
 
     }

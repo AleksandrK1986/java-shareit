@@ -11,7 +11,6 @@ import ru.practicum.shareit.item.ItemController;
 import ru.practicum.shareit.requests.ItemRequestController;
 import ru.practicum.shareit.user.UserController;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -31,14 +30,14 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler
+    /*@ExceptionHandler
     public ResponseEntity<Map<String, String>> handleValidation(final ValidationException e) {
         log.warn("Ошибка проверки объекта {}    Причина: {}", LocalDateTime.now(), e.getMessage());
         return new ResponseEntity<>(
                 Map.of("error", e.getMessage()),
                 HttpStatus.BAD_REQUEST
         );
-    }
+    }*/
 
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handlePSQLExceptionHelper(DataIntegrityViolationException e) {
