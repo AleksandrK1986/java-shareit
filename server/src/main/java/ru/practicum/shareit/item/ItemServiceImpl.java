@@ -13,7 +13,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.requests.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,13 +46,13 @@ public class ItemServiceImpl implements ItemService {
         checkUser(userId);
         item.setOwner(userRepository.getReferenceById(userId));
         if (item.getName().isBlank()) {
-            throw new ValidationException("У вещи должно быть указано название");
+            throw new NullPointerException("У вещи должно быть указано название");
         }
         if (item.getAvailable() == null) {
-            throw new ValidationException("У вещи должна быть указан доступность");
+            throw new NullPointerException("У вещи должна быть указан доступность");
         }
         if (item.getDescription() == null) {
-            throw new ValidationException("У вещи должно быть указано описание");
+            throw new NullPointerException("У вещи должно быть указано описание");
         }
         if (item.getRequestId() != null) {
             item.setRequest(itemRequestRepository.getReferenceById(item.getRequestId()));
@@ -70,7 +69,7 @@ public class ItemServiceImpl implements ItemService {
                 itemRepository.getReferenceById(itemId),
                 LocalDateTime.now());
         if (comment.getText().isBlank()) {
-            throw new ValidationException("Передан пустой комментарий");
+            throw new NullPointerException("Передан пустой комментарий");
         }
         if (booking != null) {
             comment.setAuthor(userRepository.getReferenceById(userId));
@@ -78,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
             comment.setCreated(LocalDateTime.now());
             return commentRepository.save(comment);
         } else {
-            throw new ValidationException("Пользователь не может комментирировать вещь, которую не бронировал");
+            throw new NullPointerException("Пользователь не может комментирировать вещь, которую не бронировал");
         }
     }
 
@@ -86,9 +85,11 @@ public class ItemServiceImpl implements ItemService {
     public List<Item> findAll(long userId, Integer from, Integer size) {
         checkUser(userId);
         Sort sortBy = Sort.by(Sort.Direction.ASC, "id");
-        Pageable page = null;
-        if (from != null || size != null) {
+        Pageable page;
+        if (from != null && size != null && from != 0) {
             page = PageRequest.of(from / size, from / size, sortBy);
+        } else if (from != null && size != null && from == 0) {
+            page = PageRequest.of(0, size, sortBy);
         } else {
             page = PageRequest.of(0, maxSize, sortBy);
         }

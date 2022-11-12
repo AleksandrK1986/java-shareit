@@ -33,12 +33,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
+//import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+//import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+//import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -178,28 +178,28 @@ public class ItemControllerTest {
 
     @Test
     void testCreateItem() throws Exception {
-        when(itemService.create(Mockito.any(), Mockito.anyLong()))
+        Mockito.when(itemService.create(Mockito.any(), Mockito.anyLong()))
                 .thenReturn(item);
-        mvc.perform(post("/items")
+        mvc.perform(MockMvcRequestBuilders.post("/items")
                         .header("X-Sharer-User-Id", "1")
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(itemDto.getId()), long.class))
-                .andExpect(jsonPath("$.description", is(itemDto.getDescription()), String.class));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description", Is.is(itemDto.getDescription()), String.class));
     }
 
     @Test
     void testFindByIdItem() throws Exception {
-        when(itemService.findById(Mockito.anyLong(), Mockito.anyLong()))
+        Mockito.when(itemService.findById(Mockito.anyLong(), Mockito.anyLong()))
                 .thenReturn(item);
-        mvc.perform(get("/items/{id}", 1)
+        mvc.perform(MockMvcRequestBuilders.get("/items/{id}", 1)
                         .header("X-Sharer-User-Id", "1"))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", Matchers.is(itemWithBookingDto.getId()), long.class));
     }
 
@@ -207,16 +207,16 @@ public class ItemControllerTest {
     void testFindAllItem() throws Exception {
         List<Item> itemList = new ArrayList<>();
         itemList.add(item);
-        when(itemService.findAll(
+        Mockito.when(itemService.findAll(
                 Mockito.anyLong(),
                 Mockito.any(),
                 Mockito.any()))
                 .thenReturn(itemList);
-        mvc.perform(get("/items")
+        mvc.perform(MockMvcRequestBuilders.get("/items")
                         .header("X-Sharer-User-Id", "1"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(jsonPath("$[0].id", Matchers.is(itemWithBookingDto.getId()), long.class));
     }
 
@@ -224,57 +224,57 @@ public class ItemControllerTest {
     void testSearchItem() throws Exception {
         List<Item> itemList = new ArrayList<>();
         itemList.add(item);
-        when(itemService.search(Mockito.anyString()))
+        Mockito.when(itemService.search(Mockito.anyString()))
                 .thenReturn(itemList);
-        mvc.perform(get("/items/search")
+        mvc.perform(MockMvcRequestBuilders.get("/items/search")
                         .header("X-Sharer-User-Id", "1"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(jsonPath("$[0].id", Matchers.is(itemDto.getId()), long.class));
     }
 
     @Test
     void testCreateComment() throws Exception {
-        when(itemService.createComment(Mockito.any(), Mockito.anyLong(), Mockito.anyLong()))
+        Mockito.when(itemService.createComment(Mockito.any(), Mockito.anyLong(), Mockito.anyLong()))
                 .thenReturn(comment);
-        mvc.perform(post("/items/{itemId}/comment", 1)
+        mvc.perform(MockMvcRequestBuilders.post("/items/{itemId}/comment", 1)
                         .header("X-Sharer-User-Id", "1")
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(commentDto.getId()), long.class))
-                .andExpect(jsonPath("$.text", is(commentDto.getText()), String.class));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.text", Is.is(commentDto.getText()), String.class));
     }
 
     @Test
     void testUpdateItem() throws Exception {
-        when(itemService.update(Mockito.any(), Mockito.anyLong(), Mockito.anyLong()))
+        Mockito.when(itemService.update(Mockito.any(), Mockito.anyLong(), Mockito.anyLong()))
                 .thenReturn(item);
-        mvc.perform(patch("/items/{itemId}", 1)
+        mvc.perform(MockMvcRequestBuilders.patch("/items/{itemId}", 1)
                         .header("X-Sharer-User-Id", "1")
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(itemDto.getId()), long.class))
-                .andExpect(jsonPath("$.description", is(itemDto.getDescription()), String.class));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description", Is.is(itemDto.getDescription()), String.class));
     }
 
     @Test
     void testDeleteItem() throws Exception {
-        mvc.perform(delete("/items/{id}", 1)
+        mvc.perform(MockMvcRequestBuilders.delete("/items/{id}", 1)
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print());
         Mockito
                 .verify(itemService, Mockito.times(1))
                 .delete(Mockito.anyLong());

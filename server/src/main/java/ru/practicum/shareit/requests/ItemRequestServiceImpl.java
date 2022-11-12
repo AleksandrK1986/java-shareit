@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.user.UserRepository;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequest create(ItemRequest data, long userId) {
         checkUser(userId);
         if (data.getDescription() == null || data.getDescription().isBlank()) {
-            throw new ValidationException("Передано пустое описание");
+            throw new NullPointerException("Передано пустое описание");
         }
         data.setRequestor(userRepository.getReferenceById(userId));
         data.setCreated(LocalDateTime.now());

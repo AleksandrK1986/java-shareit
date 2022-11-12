@@ -22,13 +22,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
+//import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+//import static org.mockito.ArgumentMatchers.any;
+//import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+//import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -58,12 +58,12 @@ public class UserControllerTest {
                 "john",
                 "doe@mail.com");
         try (MockedStatic<UserMapper> theMock = Mockito.mockStatic(UserMapper.class)) {
-            theMock.when(() -> UserMapper.toUser(Mockito.any()))
+            theMock.when(() -> UserMapper.toUser(ArgumentMatchers.any()))
                     .thenReturn(user);
             assertEquals(user, UserMapper.toUser(userDto));
         }
         try (MockedStatic<UserMapper> theMock = Mockito.mockStatic(UserMapper.class)) {
-            theMock.when(() -> UserMapper.toUserDto(Mockito.any()))
+            theMock.when(() -> UserMapper.toUserDto(ArgumentMatchers.any()))
                     .thenReturn(userDto);
             assertEquals(userDto, UserMapper.toUserDto(user));
         }
@@ -71,70 +71,70 @@ public class UserControllerTest {
 
     @Test
     void testCreateUser() throws Exception {
-        when(userService.create(any()))
+        Mockito.when(userService.create(ArgumentMatchers.any()))
                 .thenReturn(user);
-        mvc.perform(post("/users")
+        mvc.perform(MockMvcRequestBuilders.post("/users")
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(userDto.getId()), long.class))
-                .andExpect(jsonPath("$.name", is(userDto.getName()), String.class))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail()), String.class));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name", Matchers.is(userDto.getName()), String.class))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", Matchers.is(userDto.getEmail()), String.class));
     }
 
     @Test
     void testFindByIdUser() throws Exception {
-        when(userService.findById(Mockito.anyLong()))
+        Mockito.when(userService.findById(Mockito.anyLong()))
                 .thenReturn(user);
-        mvc.perform(get("/users/{id}", 1))
-                .andExpect(status().isOk())
-                .andDo(print())
+        mvc.perform(MockMvcRequestBuilders.get("/users/{id}", 1))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(userDto.getId()), long.class))
-                .andExpect(jsonPath("$.name", is(userDto.getName()), String.class))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail()), String.class));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name", Matchers.is(userDto.getName()), String.class))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", Matchers.is(userDto.getEmail()), String.class));
     }
 
     @Test
     void testFindAll() throws Exception {
         List<User> users = new ArrayList<>();
         users.add(user);
-        when(userService.findAll())
+        Mockito.when(userService.findAll())
                 .thenReturn(users);
-        mvc.perform(get("/users"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$", hasSize(1)))
+        mvc.perform(MockMvcRequestBuilders.get("/users"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(jsonPath("$[0].id", Matchers.is(userDto.getId()), long.class));
     }
 
     @Test
     void testUpdateUser() throws Exception {
-        when(userService.update(Mockito.any(), Mockito.anyLong()))
+        Mockito.when(userService.update(ArgumentMatchers.any(), Mockito.anyLong()))
                 .thenReturn(user);
-        mvc.perform(patch("/users/{userId}", 1)
+        mvc.perform(MockMvcRequestBuilders.patch("/users/{userId}", 1)
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(userDto.getId()), long.class))
-                .andExpect(jsonPath("$.name", is(userDto.getName()), String.class))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail()), String.class));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name", Matchers.is(userDto.getName()), String.class))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", Matchers.is(userDto.getEmail()), String.class));
     }
 
     @Test
     void testDeleteUser() throws Exception {
-        mvc.perform(delete("/users/{id}", 1)
+        mvc.perform(MockMvcRequestBuilders.delete("/users/{id}", 1)
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print());
         Mockito
                 .verify(userService, Mockito.times(1))
                 .delete(Mockito.anyLong());

@@ -4,10 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.requests.dto.ItemRequestDto;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +24,7 @@ public class ItemRequestController {
     }
 
     @PostMapping
-    public ItemRequestDto create(@Valid @RequestBody ItemRequestDto itemRequestDto,
+    public ItemRequestDto create(@RequestBody ItemRequestDto itemRequestDto,
                                  @RequestHeader(value = "X-Sharer-User-Id") long userId) {
         return toItemRequestDto(itemRequestService.create(toItemRequest(itemRequestDto), userId));
     }
@@ -53,8 +49,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDto> findAllInPages(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                               @RequestParam(required = false) @PositiveOrZero Integer from,
-                                               @RequestParam(required = false) @Positive Integer size) {
+                                               @RequestParam Integer from,
+                                               @RequestParam Integer size) {
 
         List<ItemRequest> itemRequests = itemRequestService.findAllAlienRequests(userId, from, size);
         List<ItemRequestDto> itemRequestDtos = new ArrayList<>();

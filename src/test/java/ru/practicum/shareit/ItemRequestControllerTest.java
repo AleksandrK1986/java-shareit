@@ -32,13 +32,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
+//import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+//import static org.mockito.Mockito.when;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+//import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -158,16 +158,16 @@ public class ItemRequestControllerTest {
 
     @Test
     void testCreateItemRequest() throws Exception {
-        when(itemRequestService.create(Mockito.any(), Mockito.anyLong()))
+        Mockito.when(itemRequestService.create(Mockito.any(), Mockito.anyLong()))
                 .thenReturn(itemRequest);
-        mvc.perform(post("/requests")
+        mvc.perform(MockMvcRequestBuilders.post("/requests")
                         .header("X-Sharer-User-Id", "1")
                         .content(mapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", is(itemRequestDto.getId()), long.class))
                 .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription()), String.class));
     }
@@ -176,13 +176,13 @@ public class ItemRequestControllerTest {
     void testFindAllItemRequest() throws Exception {
         List<ItemRequest> itemRequestList = new ArrayList<>();
         itemRequestList.add(itemRequest);
-        when(itemRequestService.findAllUserRequest(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        Mockito.when(itemRequestService.findAllUserRequest(Mockito.anyLong(), Mockito.any(), Mockito.any()))
                 .thenReturn(itemRequestList);
-        mvc.perform(get("/requests")
+        mvc.perform(MockMvcRequestBuilders.get("/requests")
                         .header("X-Sharer-User-Id", "1"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(jsonPath("$[0].id", Matchers.is(itemRequestDto.getId()), long.class));
     }
 
@@ -190,24 +190,24 @@ public class ItemRequestControllerTest {
     void testFindAllItemRequestPages() throws Exception {
         List<ItemRequest> itemRequestList = new ArrayList<>();
         itemRequestList.add(itemRequest);
-        when(itemRequestService.findAllAlienRequests(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        Mockito.when(itemRequestService.findAllAlienRequests(Mockito.anyLong(), Mockito.any(), Mockito.any()))
                 .thenReturn(itemRequestList);
-        mvc.perform(get("/requests/all")
+        mvc.perform(MockMvcRequestBuilders.get("/requests/all")
                         .header("X-Sharer-User-Id", "1"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(jsonPath("$[0].id", Matchers.is(itemRequestDto.getId()), long.class));
     }
 
     @Test
     void testFindAllItemRequestById() throws Exception {
-        when(itemRequestService.findById(Mockito.anyLong(), Mockito.anyLong()))
+        Mockito.when(itemRequestService.findById(Mockito.anyLong(), Mockito.anyLong()))
                 .thenReturn(itemRequest);
-        mvc.perform(get("/requests/{requestId}", 1)
+        mvc.perform(MockMvcRequestBuilders.get("/requests/{requestId}", 1)
                         .header("X-Sharer-User-Id", "1"))
-                .andExpect(status().isOk())
-                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.id", Matchers.is(itemRequestDto.getId()), long.class));
     }
 
